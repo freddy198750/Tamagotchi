@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f9f8f2">
+  <meta name="description" content="Mochi Garden เกมเลี้ยงสัตว์สไตล์ Tamagotchi เล่นฟรีในเบราว์เซอร์ ไฟล์ HTML เดียว">
+  <title>Mochi Garden 🐣 — เกมเลี้ยงสัตว์ตัวจิ๋ว</title>
+  <style>
+    :root {
+      --ink:#2b3d36; --muted:#76857d; --line:#e8ebe4; --cream:#f9f8f2;
+      --green:#365f50; --leaf:#4b9f76; --mint:#e6f7eb; --yellow:#ffda80;
+      --shadow:0 16px 50px rgba(33,66,49,.075); --radius:28px;
+      --pet:#91dcc9; --pet-dark:#58bdaf; --pet-light:#d6fff1; --cheek:#ff99ab;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--cream);color:var(--ink);font-family:ui-rounded,"Noto Sans Thai", "Sarabun", "Segoe UI",Tahoma,sans-serif;line-height:1.5;min-width:320px}
+    button,input{font:inherit}
+    button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+    button:focus-visible,input:focus-visible{outline:3px solid #80bb8b;outline-offset:3px}
+    .shell{max-width:1175px;margin:0 auto;padding:28px 24px 45px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:24px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brandmark{width:50px;height:50px;display:grid;place-items:center;background:#e3f3e6;border:1px solid #d5e9d8;border-radius:17px;font-size:25px;transform:rotate(-5deg);box-shadow:0 4px 0 #cbded0}
+    .brand h1{font-size:24px;font-weight:950;line-height:1.05;margin:0;letter-spacing:-.7px}
+    .brand .sub{display:block;font-size:11px;letter-spacing:2.8px;font-weight:800;color:#81a093;margin-top:4px}
+    .header-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{display:inline-flex;gap:9px;align-items:center;border:1px solid var(--line);background:white;border-radius:100px;padding:10px 15px;font-size:13px;font-weight:800;white-space:nowrap}
+    .pill strong{font-size:16px}
+    .header-button{border:1px solid var(--line);background:white;border-radius:14px;height:43px;width:43px;display:grid;place-items:center;font-size:20px;transition:transform .15s}
+    .header-button:hover{transform:translateY(-2px)}
+    .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(345px,.9fr);gap:22px;align-items:start}
+    .card{background:white;border:1px solid #edf0e8;box-shadow:var(--shadow);border-radius:var(--radius);overflow:hidden}
+    .scene-card{padding:18px;overflow:visible}
+    .scene-top{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:3px 5px 14px}
+    .eyebrow{text-transform:uppercase;font-size:11px;font-weight:900;letter-spacing:1.9px;color:#8ca398}
+    .pet-name{margin:2px 0 0;font-size:29px;font-weight:950;letter-spacing:-.7px;line-height:1.25}
+    .meta-chip{background:#f1f7ef;border:1px solid #e5eddf;border-radius:13px;padding:8px 12px;color:#5f7b68;font-size:12px;font-weight:850;white-space:nowrap}
+    .scene{height:395px;position:relative;overflow:hidden;border-radius:22px;background:linear-gradient(180deg,#def8ed 0%,#edfae6 65%,#c8e6bd 65%,#b7dbb2 100%);isolation:isolate;transition:background .7s}
+    .scene.night{background:linear-gradient(180deg,#415c75 0%,#647c8d 65%,#8ca892 65%,#83a18b 100%)}
+    .scene:after{content:"";position:absolute;bottom:7px;left:-30%;width:160%;height:50px;background:repeating-linear-gradient(100deg,transparent 0 25px,rgba(255,255,255,.07) 25px 31px);opacity:.8}
+    .sun{position:absolute;right:55px;top:46px;width:65px;height:65px;background:#fff3ab;border-radius:50%;box-shadow:0 0 0 12px rgba(255,246,183,.35),0 0 0 27px rgba(255,246,183,.13);transition:all .6s}
+    .night .sun{background:#fff8e3;box-shadow:inset -14px 1px 0 0 #647c8d,0 0 0 12px rgba(255,255,255,.06)}
+    .cloud{position:absolute;height:22px;width:91px;border-radius:30px;background:rgba(255,255,255,.65);top:80px;left:53px;animation:cloudFloat 11s ease-in-out infinite alternate}
+    .cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}
+    .cloud:before{width:43px;height:43px;left:13px;bottom:0}.cloud:after{width:35px;height:35px;left:47px;bottom:0}
+    .cloud.c2{top:153px;left:auto;right:25px;transform:scale(.65);animation-delay:-6s;opacity:.6}
+    .scene-hill{position:absolute;width:410px;height:145px;bottom:24px;left:-142px;border-radius:50%;background:rgba(127,197,130,.26)}
+    .scene-hill.h2{left:auto;right:-150px;bottom:18px;background:rgba(104,187,119,.24)}
+    .flower{position:absolute;bottom:31px;z-index:2;font-size:27px;filter:drop-shadow(0 3px 2px rgba(47,120,80,.1));animation:sway 4s ease-in-out infinite}
+    .flower.f1{left:11%}.flower.f2{right:12%;bottom:47px;animation-delay:-2s}.flower.f3{left:23%;bottom:11px;font-size:20px;animation-delay:-3s}.flower.f4{right:23%;bottom:13px;font-size:18px}
+    .speech{position:absolute;top:19px;left:50%;transform:translateX(-50%);z-index:7;background:#fff;border:2px solid #fff;box-shadow:0 5px 16px rgba(44,87,64,.11);border-radius:17px;padding:9px 17px;font-size:13px;font-weight:850;color:#5c776a;white-space:nowrap;max-width:86%;overflow:hidden;text-overflow:ellipsis;transition:opacity .2s}
+    .speech:after{content:"";position:absolute;bottom:-6px;left:calc(50% - 7px);width:13px;height:13px;background:#fff;transform:rotate(45deg)}
+    .pet-stage{position:absolute;left:50%;bottom:54px;transform:translateX(-50%);z-index:4;width:280px;height:250px;display:flex;justify-content:center;align-items:flex-end}
+    .shadow{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);background:rgba(41,97,67,.19);width:184px;height:24px;border-radius:50%;filter:blur(5px);animation:shadowPulse 3s ease-in-out infinite}
+    .pet-wrap{position:relative;z-index:2;width:250px;cursor:pointer;transform-origin:center bottom;animation:petFloat 3s ease-in-out infinite;transition:filter .3s}
+    .pet-wrap.stage-baby{width:198px}.pet-wrap.stage-teen{width:225px}.pet-wrap.stage-grown{width:250px}
+    .pet-wrap svg{width:100%;display:block;overflow:visible;filter:drop-shadow(0 9px 0 rgba(41,97,67,.09))}
+    .pet-wrap.hop{animation:hop .65s ease-in-out}
+    .pet-wrap.sad{animation:petSad 3s ease-in-out infinite}
+    .pet-wrap.sleepy{animation:petSleep 4s ease-in-out infinite}
+    .pet-wrap .pet-main{fill:var(--pet)}.pet-wrap .pet-dark{fill:var(--pet-dark)}.pet-wrap .pet-light{fill:var(--pet-light)}.pet-wrap .cheeks{fill:var(--cheek)}
+    .pet-wrap .eye{transform-box:fill-box;transform-origin:center;animation:blink 6s infinite}
+    .pet-wrap.sleepy .awake-eyes{display:none}.pet-wrap:not(.sleepy) .closed-eyes{display:none}
+    .pet-wrap .ear-left{transform-origin:65px 90px;animation:earWiggle 4s ease-in-out infinite}.pet-wrap .ear-right{transform-origin:180px 90px;animation:earWiggle 4s ease-in-out infinite reverse}
+    .pet-wrap.stage-baby .grown-only{display:none}
+    .pet-wrap.stage-teen .grown-only{opacity:.6}
+    .particle{position:absolute;z-index:10;left:50%;top:48%;pointer-events:none;font-weight:900;font-size:21px;animation:particleFly .95s ease-out forwards;--dx:0px}
+    .pet-quip{padding:15px 10px 5px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+    .pet-quip .mood{font-size:13px;font-weight:800}.pet-quip .hint{color:#95a29a;font-size:11px;text-align:right}
+    .info-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .mini-stat{border:1px solid #edf0e8;border-radius:16px;padding:12px 15px;background:#fff}
+    .mini-stat span{display:block;color:#8d9b93;font-size:11px;font-weight:800}
+    .mini-stat strong{display:block;font-size:20px;font-weight:950;margin-top:1px}
+    .right-col{display:flex;flex-direction:column;gap:16px}
+    .panel{padding:23px}
+    .panel-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}
+    .panel h2{font-size:18px;font-weight:950;letter-spacing:-.2px;margin:0}
+    .small-note{font-size:11px;color:#91a095;font-weight:750}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 20px}
+    .stat-head{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:8px;font-size:12px;font-weight:850}
+    .stat-head .value{color:#84938b;font-size:11px}
+    .meter{height:10px;border-radius:20px;background:#edf2ed;overflow:hidden}
+    .fill{height:100%;width:50%;border-radius:20px;transition:width .5s ease;background:#8bd2a1}
+    .fill.food{background:#f5c96a}.fill.fun{background:#fa9bb0}.fill.clean{background:#7bcfca}.fill.energy{background:#aa9ee9}.fill.health{background:#e89b81}.fill.low{background:#ee877a}
+    .wide-stat{margin-top:17px;padding-top:14px;border-top:1px dashed #edf0e8}
+    .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#f3f6f0;padding:5px;border-radius:15px;gap:4px;margin-bottom:19px}
+    .tab{border:0;background:transparent;border-radius:12px;padding:9px 5px;font-weight:850;color:#8b9c8f;font-size:12px;transition:.2s}
+    .tab.active{background:white;box-shadow:0 2px 6px #b2c7b32d;color:#355b47}
+    .tab-content{display:none}.tab-content.active{display:block}
+    .action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+    .action{border:1px solid #e5eee5;background:#f7faf5;border-radius:17px;min-height:89px;display:flex;align-items:center;text-align:left;gap:12px;padding:14px;transition:transform .15s,background .15s,border-color .15s}
+    .action:hover{background:#ecf6ed;border-color:#cbdccb;transform:translateY(-2px)}.action:active{transform:scale(.97)}
+    .action:disabled{opacity:.48;cursor:not-allowed;transform:none}
+    .action .bubble{width:44px;height:44px;flex-shrink:0;display:grid;place-items:center;background:white;border-radius:14px;font-size:24px;box-shadow:0 3px 10px rgba(58,101,71,.05)}
+    .action strong{font-size:13px;font-weight:900;display:block;white-space:nowrap}.action small{font-size:10px;color:#8a9d8b;font-weight:750;display:block;margin-top:4px}
+    .activity-tip{margin-top:14px;padding:11px 13px;background:#f5f8f0;border-radius:12px;color:#738575;font-size:11px;display:flex;align-items:center;gap:7px}
+    .shop-item{border:1px solid #ecf0e9;border-radius:15px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:9px;background:#fdfefc}
+    .shop-emoji{width:44px;height:44px;background:#f3f7ec;display:grid;place-items:center;border-radius:13px;font-size:25px}
+    .shop-desc{flex:1;min-width:0}.shop-desc strong{font-size:12px;display:block}.shop-desc small{font-size:10px;color:#94a199;display:block}
+    .shop-btn{border:0;background:#e7f3e7;color:#3e7951;font-weight:900;font-size:11px;padding:9px 10px;border-radius:10px;white-space:nowrap}
+    .shop-btn:hover{background:#d3eacf}.shop-btn:disabled{opacity:.45;cursor:not-allowed}
+    .log-list{list-style:none;padding:0;margin:0;display:grid;gap:10px;max-height:253px;overflow:auto}
+    .log-list li{border-bottom:1px solid #f1f2ed;padding:0 0 10px;display:flex;gap:10px;font-size:12px;color:#6b7b71}
+    .log-list strong{color:#3a594a}
+    .xpbar{margin-top:16px;border-radius:16px;background:#f5f8ef;padding:14px}
+    .xpbar-top{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:8px}
+    .xpbar .meter{background:#e4eade;height:8px}.xpbar .fill{background:#91cfa0}
+    .footer{display:flex;justify-content:space-between;gap:15px;margin-top:23px;font-size:11px;font-weight:750;color:#98a89a;flex-wrap:wrap}
+    .footer button{background:none;border:0;padding:0;color:#648d71;font-weight:900;text-decoration:underline;text-underline-offset:3px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(29,48,40,.56);backdrop-filter:blur(7px);display:grid;place-items:center;z-index:50;padding:16px;overflow-y:auto}
+    .modal-backdrop[hidden]{display:none !important}
+    .modal{width:min(100%,480px);background:#fffefb;border-radius:29px;box-shadow:0 20px 100px rgba(14,42,25,.24);padding:29px;position:relative;margin:auto;max-height:calc(100vh - 24px);overflow-y:auto}
+    .modal h2{margin:0 0 7px;font-size:26px;line-height:1.25;font-weight:950}.modal p{margin:0 0 18px;color:#75887a;font-size:13px}
+    .modal .tiny{font-size:11px;color:#92a398}.modal .label{display:block;margin-bottom:8px;font-size:12px;font-weight:900}
+    .text-input{width:100%;height:47px;border-radius:13px;border:1px solid #dbe6dc;background:#f9fcf8;padding:0 14px;font-size:14px;color:var(--ink);outline:none}
+    .text-input:focus{border-color:#8bcba2}
+    .color-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 19px}
+    .color-option{border:2px solid transparent;border-radius:17px;background:#f5f7f4;padding:12px 5px 9px;text-align:center;color:#66766a;font-weight:900;font-size:11px}
+    .color-option .egg{font-size:32px;display:block;margin:0 0 5px;filter:drop-shadow(0 3px 2px #7e9a8533)}
+    .color-option.selected{border-color:#83b99d;background:#edf9ee;color:#365b45}
+    .primary{width:100%;padding:14px 20px;border:0;border-radius:14px;background:#3a7b57;color:white;font-weight:900;box-shadow:0 5px 0 #286047;transition:.15s}
+    .primary:hover{background:#326e4e}.primary:active{transform:translateY(3px);box-shadow:0 2px 0 #286047}
+    .secondary{border:1px solid #e1e9df;background:#f5f8f2;border-radius:12px;padding:11px 14px;font-weight:900;color:#56715c}
+    .close-btn{position:absolute;right:19px;top:18px;background:#f0f5ee;border:0;border-radius:50%;width:33px;height:33px;font-size:18px;display:grid;place-items:center}
+    .intro-pet{text-align:center;font-size:76px;line-height:1;margin:5px 0 18px;animation:petFloat 2.5s ease-in-out infinite}
+    .settings-list{display:grid;gap:10px;margin-bottom:15px}.settings-row{padding:12px;border:1px solid var(--line);border-radius:13px;display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px;font-weight:850}
+    .danger{background:#fff1ed;color:#af5751;border:1px solid #f5d5cf;border-radius:12px;padding:12px 14px;font-weight:900;width:100%}
+    .minigame-header{display:flex;justify-content:space-between;align-items:center;background:#f1f8e9;padding:12px 15px;border-radius:14px;margin-bottom:10px;font-size:13px;font-weight:900}
+    .minigame-field{height:300px;position:relative;overflow:hidden;background:radial-gradient(circle at 40% 30%,#f8f4c9,#e0f3de 60%,#d2e9d6);border-radius:17px;border:1px solid #e1eed8;touch-action:manipulation}
+    .star{position:absolute;border:0;background:transparent;font-size:37px;filter:drop-shadow(0 2px 3px #9b9b5c55);padding:8px}
+    .star:active{transform:scale(.8)}
+    .game-result{text-align:center;padding:20px 10px}.game-result .big{font-size:61px;display:block}
+    .toast-host{position:fixed;right:20px;bottom:19px;z-index:80;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:calc(100vw - 40px)}
+    .toast{background:#294b3c;color:white;padding:11px 16px;border-radius:13px;box-shadow:0 8px 24px #17372633;font-size:12px;font-weight:850;animation:toastIn .2s ease-out}
+    .muted{color:#849589}
+    @keyframes petFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1deg)}}
+    @keyframes petSleep{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+    @keyframes petSad{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(2deg)}}
+    @keyframes hop{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-42px) scale(1.03,.97)}65%{transform:translateY(-12px) scale(.95,1.05)}}
+    @keyframes blink{0%,43%,46%,90%,93%,100%{transform:scaleY(1)}44.5%,91.5%{transform:scaleY(.08)}}
+    @keyframes earWiggle{0%,85%,100%{transform:rotate(0)}92%{transform:rotate(-7deg)}}
+    @keyframes sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(8deg)}}
+    @keyframes shadowPulse{0%,100%{transform:translateX(-50%) scale(1);opacity:.7}50%{transform:translateX(-50%) scale(.8);opacity:.45}}
+    @keyframes cloudFloat{to{translate:35px 0}}
+    @keyframes particleFly{0%{opacity:1;transform:translate(0,0) scale(.7)}100%{opacity:0;transform:translate(var(--dx),-115px) scale(1.2)}}
+    @keyframes starWiggle{to{rotate:14deg;scale:1.08}}
+    @keyframes toastIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:850px){.shell{max-width:670px}.layout{grid-template-columns:1fr}.right-col{gap:14px}.scene{height:395px}}
+    @media(max-width:500px){.shell{padding:17px 12px 32px}.topbar{margin-bottom:17px}.brand h1{font-size:21px}.brandmark{width:42px;height:42px;font-size:22px}.pill{padding:9px 11px;font-size:11px;gap:5px}.pill strong{font-size:13px}.header-button{width:38px;height:38px}.brand .sub{letter-spacing:1.2px;font-size:8px;white-space:nowrap}.topbar{gap:9px}.header-right{gap:6px;flex-wrap:nowrap}.brand{gap:8px;min-width:0}.brand h1{font-size:18px;white-space:nowrap}.brandmark{width:37px;height:37px;font-size:20px;flex-shrink:0}.pill{padding:8px 9px}.header-button{width:34px;height:34px}.layout{gap:13px}.scene-card{padding:11px}.scene-top{padding:6px 5px 12px}.scene{height:330px}.pet-stage{bottom:43px}.pet-wrap.stage-grown{width:213px}.pet-wrap.stage-teen{width:199px}.pet-wrap.stage-baby{width:180px}.pet-name{font-size:24px}.speech{font-size:11px;top:14px}.sun{width:47px;height:47px;right:28px;top:65px}.cloud{left:27px;top:102px;scale:.75}.panel{padding:18px}.panel h2{font-size:17px}.action{gap:8px;padding:11px;min-height:79px}.action .bubble{width:36px;height:37px;font-size:21px}.action strong{font-size:12px}.action small{font-size:9px}.mini-stat{padding:11px}.mini-stat strong{font-size:18px}.pet-quip{align-items:start}.pet-quip .hint{max-width:48%}.flower{font-size:21px}.modal{padding:22px}.stat-grid{column-gap:15px}}
+    @media(max-width:360px){.brandmark{display:none}.pill{padding:7px 8px}.header-button{width:32px;height:32px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand"><div class="brandmark" aria-hidden="true">🌱</div><div><h1>Mochi Garden<span class="sub">YOUR LITTLE PET WORLD</span></h1></div></div>
+    <div class="header-right">
+      <div class="pill" title="เหรียญสำหรับซื้อของในร้าน"><span>🪙</span> <strong id="coinsTop">120</strong></div>
+      <button class="header-button" id="soundBtn" aria-label="เปิดหรือปิดเสียง" title="เปิด/ปิดเสียง">🔇</button>
+      <button class="header-button" id="settingsBtn" aria-label="ตั้งค่า" title="ตั้งค่า">⚙️</button>
+    </div>
+  </header>
+  <div class="layout">
+    <section class="card scene-card" aria-label="สัตว์เลี้ยงของคุณ">
+      <div class="scene-top">
+        <div><div class="eyebrow">✿ MY LITTLE BUDDY</div><h2 class="pet-name" id="petName">โมจิ 🌼</h2></div>
+        <div class="meta-chip" id="ageBadge">🐣 วันที่ 1 · วัยเด็ก</div>
+      </div>
+      <div class="scene" id="scene">
+        <div class="sun" aria-hidden="true"></div><div class="cloud" aria-hidden="true"></div><div class="cloud c2" aria-hidden="true"></div>
+        <div class="scene-hill"></div><div class="scene-hill h2"></div>
+        <div class="flower f1" aria-hidden="true">🌼</div><div class="flower f2" aria-hidden="true">🌷</div><div class="flower f3" aria-hidden="true">🌱</div><div class="flower f4" aria-hidden="true">🌸</div>
+        <div class="speech" id="speech" aria-live="polite">ยินดีที่ได้รู้จักนะ! 💚</div>
+        <div class="pet-stage">
+          <div class="shadow"></div>
+          <div class="pet-wrap stage-baby" id="petWrap" role="button" tabindex="0" aria-label="ลูบหัวสัตว์เลี้ยง">
+            <svg viewBox="0 0 250 265" aria-hidden="true">
+              <ellipse class="pet-dark" cx="43" cy="169" rx="24" ry="34" transform="rotate(-32 43 169)" />
+              <ellipse class="pet-dark" cx="205" cy="174" rx="24" ry="34" transform="rotate(32 205 174)" />
+              <g class="ear-left"><path class="pet-dark" d="M73 102 C40 55 41 6 65 9 C92 11 100 63 104 100Z"/><path class="pet-light" d="M76 85 C59 56 56 25 68 25 C81 28 85 59 91 90Z"/></g>
+              <g class="ear-right"><path class="pet-dark" d="M150 102 C153 60 167 9 190 13 C218 18 192 74 174 110Z"/><path class="pet-light" d="M161 91 C167 62 178 29 190 29 C199 32 181 71 173 97Z"/></g>
+              <ellipse class="pet-dark" cx="85" cy="230" rx="32" ry="22"/><ellipse class="pet-dark" cx="169" cy="230" rx="32" ry="22"/>
+              <path class="pet-main" d="M39 153 C39 103 68 79 126 77 C180 76 213 107 214 159 C216 213 181 240 129 243 C76 246 36 219 39 153Z"/>
+              <ellipse class="pet-light" cx="125" cy="183" rx="64" ry="47" opacity=".62"/>
+              <ellipse cx="87" cy="166" rx="13" ry="7" class="cheeks" opacity=".76"/><ellipse cx="169" cy="166" rx="13" ry="7" class="cheeks" opacity=".76"/>
+              <g class="awake-eyes"><ellipse class="eye" cx="94" cy="147" rx="8" ry="12" fill="#354c47"/><ellipse class="eye" cx="159" cy="147" rx="8" ry="12" fill="#354c47"/><circle cx="97" cy="143" r="2.5" fill="white"/><circle cx="162" cy="143" r="2.5" fill="white"/></g>
+              <g class="closed-eyes" stroke="#354c47" stroke-width="5" fill="none" stroke-linecap="round"><path d="M84 147 Q94 157 104 147"/><path d="M149 147 Q159 157 169 147"/></g>
+              <path id="mouth" d="M118 167 Q126 177 134 167" stroke="#704f55" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <ellipse class="pet-main" cx="70" cy="218" rx="24" ry="15" transform="rotate(-22 70 218)"/><ellipse class="pet-main" cx="181" cy="218" rx="24" ry="15" transform="rotate(22 181 218)"/>
+              <g class="grown-only"><path fill="#81bd71" d="M118 82 C104 52 104 38 124 49 C134 55 132 72 129 83Z"/><path fill="#61a769" d="M129 82 C144 48 161 43 152 67 C147 80 132 87 129 82Z"/></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="pet-quip"><span class="mood" id="moodText">💚 กำลังมีความสุขสุด ๆ</span><span class="hint">👆 แตะที่ตัวโมจิเพื่อลูบหัว</span></div>
+      <div class="info-strip">
+        <div class="mini-stat"><span>⭐ เลเวล</span><strong id="levelStat">1</strong></div>
+        <div class="mini-stat"><span>🎂 อายุในเกม</span><strong id="dayStat">1 วัน</strong></div>
+        <div class="mini-stat"><span>🎀 พัฒนาการ</span><strong id="stageStat">ตัวน้อย</strong></div>
+      </div>
+    </section>
+    <div class="right-col">
+      <section class="card panel" aria-label="สถานะของสัตว์เลี้ยง">
+        <div class="panel-top"><h2>💖 สุขภาพเจ้าตัวเล็ก</h2><span class="small-note" id="saveIndicator">● เซฟอัตโนมัติ</span></div>
+        <div class="stat-grid">
+          <div><div class="stat-head"><span>🍙 ความอิ่ม</span><span class="value" id="foodNum">82%</span></div><div class="meter"><div class="fill food" id="foodBar"></div></div></div>
+          <div><div class="stat-head"><span>🥰 ความสุข</span><span class="value" id="funNum">80%</span></div><div class="meter"><div class="fill fun" id="funBar"></div></div></div>
+          <div><div class="stat-head"><span>🫧 ความสะอาด</span><span class="value" id="cleanNum">85%</span></div><div class="meter"><div class="fill clean" id="cleanBar"></div></div></div>
+          <div><div class="stat-head"><span>⚡ พลังงาน</span><span class="value" id="energyNum">90%</span></div><div class="meter"><div class="fill energy" id="energyBar"></div></div></div>
+        </div>
+        <div class="wide-stat"><div class="stat-head"><span>❤️ สุขภาพ</span><span class="value" id="healthNum">100%</span></div><div class="meter"><div class="fill health" id="healthBar"></div></div></div>
+      </section>
+      <section class="card panel" aria-label="กิจกรรมและร้านค้า">
+        <div class="tabs" role="tablist" aria-label="เลือกหน้าจอ">
+          <button role="tab" aria-selected="true" class="tab active" data-tab="care">🌿 ดูแล</button>
+          <button role="tab" aria-selected="false" class="tab" data-tab="shop">🛍️ ร้านค้า</button>
+          <button role="tab" aria-selected="false" class="tab" data-tab="diary">📖 บันทึก</button>
+        </div>
+        <div class="tab-content active" id="care" role="tabpanel">
+          <div class="action-grid">
+            <button class="action" data-action="feed"><span class="bubble">🍙</span><span><strong>ให้อาหาร</strong><small>+25 อิ่ม · 🪙 8</small></span></button>
+            <button class="action" data-action="play"><span class="bubble">🪀</span><span><strong>เล่นด้วย</strong><small>+24 สุข · +เหรียญ</small></span></button>
+            <button class="action" data-action="wash"><span class="bubble">🧼</span><span><strong>อาบน้ำ</strong><small>+32 สะอาด</small></span></button>
+            <button class="action" data-action="sleep"><span class="bubble">🌙</span><span><strong id="sleepLabel">เข้านอน</strong><small id="sleepSub">ฟื้นฟูพลังงาน</small></span></button>
+            <button class="action" data-action="heal"><span class="bubble">💊</span><span><strong>รักษา</strong><small>+30 สุขภาพ · 🪙 20</small></span></button>
+            <button class="action" data-action="game"><span class="bubble">⭐</span><span><strong>เกมจับดาว</strong><small>เล่นรับเหรียญ</small></span></button>
+          </div>
+          <div class="activity-tip">💡 เล่นและดูแลน้องเพื่อเก็บ EXP — 1 วันในเกม = 5 นาทีจริง</div>
+        </div>
+        <div class="tab-content" id="shop" role="tabpanel">
+          <div class="panel-top" style="margin-bottom:12px"><h2>ร้านของเจ้าตัวจิ๋ว</h2><span class="small-note">เติมความสุขกัน!</span></div>
+          <div class="shop-item"><span class="shop-emoji">🍓</span><span class="shop-desc"><strong>สตรอว์เบอร์รี</strong><small>อิ่ม +12 · ความสุข +15</small></span><button class="shop-btn" data-buy="berry">🪙 15</button></div>
+          <div class="shop-item"><span class="shop-emoji">🧸</span><span class="shop-desc"><strong>ตุ๊กตาหมี</strong><small>ความสุข +35 · ถาวร 1 ชิ้น</small></span><button class="shop-btn" data-buy="teddy">🪙 55</button></div>
+          <div class="shop-item"><span class="shop-emoji">🎀</span><span class="shop-desc"><strong>โบสีชมพู</strong><small>ประดับชื่อสัตว์เลี้ยง · ถาวร</small></span><button class="shop-btn" data-buy="ribbon">🪙 80</button></div>
+          <div class="activity-tip" id="inventoryText">🎒 ของสะสม: ยังไม่มี</div>
+        </div>
+        <div class="tab-content" id="diary" role="tabpanel">
+          <div class="panel-top" style="margin-bottom:12px"><h2>เรื่องราวของเรา</h2><span class="small-note" id="totalCare">ดูแล 0 ครั้ง</span></div>
+          <ul class="log-list" id="logList"><li>🌼 ยินดีต้อนรับสู่สวนโมจิ!</li></ul>
+          <div class="activity-tip" id="growTip">🌱 ดูแลเจ้าตัวน้อย แล้วเติบโตไปด้วยกัน</div>
+        </div>
+        <div class="xpbar"><div class="xpbar-top"><span id="xpTitle">✨ EXP เลเวล 1</span><span class="muted" id="xpCount">0 / 60</span></div><div class="meter"><div class="fill" id="xpBar"></div></div></div>
+      </section>
+    </div>
+  </div>
+  <footer class="footer"><span>🌷 Mochi Garden — เกมตัวอย่าง HTML ไฟล์เดียว · เล่นได้แม้ไม่มีอินเทอร์เน็ต</span><span>💾 ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · <button id="resetLink">เริ่มเกมใหม่</button></span></footer>
+</main>
+<div class="modal-backdrop" id="startModal" hidden role="dialog" aria-modal="true" aria-labelledby="startTitle">
+  <div class="modal"><div class="intro-pet">🥚</div><h2 id="startTitle" style="text-align:center">รับน้องมาเลี้ยงกัน! 🌷</h2><p style="text-align:center">ตั้งชื่อน่ารัก ๆ แล้วเลือกสีให้เพื่อนตัวจิ๋วของคุณ</p><label class="label" for="newName">ชื่อสัตว์เลี้ยง</label><input class="text-input" id="newName" maxlength="18" value="โมจิ" placeholder="เช่น โมจิ, พุดดิ้ง, บับเบิล"><label class="label" style="margin-top:17px">เลือกสีน้อง</label><div class="color-options" id="colorOptions"><button class="color-option selected" data-color="mint"><span class="egg">🟢</span>มินต์</button><button class="color-option" data-color="pink"><span class="egg">🩷</span>ชมพู</button><button class="color-option" data-color="purple"><span class="egg">💜</span>ม่วง</button><button class="color-option" data-color="yellow"><span class="egg">💛</span>ครีม</button></div><button class="primary" id="startBtn">🐣 ฟักไข่เลย!</button><p class="tiny" style="text-align:center;margin:15px 0 0">เกมจำลอง: ไม่มีบัญชีล็อกอิน บันทึกด้วย LocalStorage เท่านั้น</p></div>
+</div>
+<div class="modal-backdrop" id="settingsModal" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal"><button class="close-btn" data-close="settingsModal" aria-label="ปิด">×</button><h2 id="settingsTitle">⚙️ ตั้งค่าเกม</h2><p>ปรับชื่อและจัดการข้อมูลสัตว์เลี้ยงของคุณ</p><label class="label" for="renameInput">เปลี่ยนชื่อสัตว์เลี้ยง</label><div style="display:flex;gap:9px;margin-bottom:17px"><input class="text-input" id="renameInput" maxlength="18"><button class="secondary" id="renameBtn">บันทึก</button></div><div class="settings-list"><div class="settings-row"><span>🔊 เสียงเอฟเฟกต์</span><button class="secondary" id="soundToggle">ปิดเสียง</button></div><div class="settings-row"><span>💾 ที่เก็บข้อมูล</span><span class="muted">LocalStorage</span></div><div class="settings-row"><span>🌱 เวลาเติบโต</span><span class="muted">วันละ 5 นาที</span></div></div><button class="danger" id="restartBtn">🗑️ ลบเซฟและเริ่มเลี้ยงใหม่</button><p class="tiny" style="margin-top:15px">⚠️ ไฟล์ HTML นี้ไม่มีระบบเซิร์ฟเวอร์ ผู้เล่นสามารถแก้เซฟของตัวเองได้ เหมาะสำหรับทดลองเกมเท่านั้น</p></div>
+</div>
+<div class="modal-backdrop" id="gameModal" hidden role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+  <div class="modal"><button class="close-btn" id="gameClose" aria-label="ปิด">×</button><h2 id="gameTitle">⭐ เกมเก็บดาว</h2><p>แตะดาวให้ได้มากที่สุดภายใน 12 วินาที เพื่อสะสมเหรียญ!</p><div class="minigame-header"><span>⭐ คะแนน <span id="starScore">0</span></span><span>⏱️ <span id="starTime">12</span> วิ</span></div><div class="minigame-field" id="starField"><div class="game-result"><span class="big">✨</span><strong>พร้อมจับดาวหรือยัง?</strong><p>ดาวหนึ่งดวงมีค่า 2 เหรียญ</p><button class="primary" id="starStart" style="max-width:210px">เริ่มเล่น!</button></div></div><p class="tiny" style="text-align:center;margin:13px 0 0">เล่นได้อีกหลังจบรอบ · คะแนนสูงสุด <span id="bestScore">0</span></p></div>
+</div>
+<div class="toast-host" id="toasts" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'mochi_garden_save_v1';
+  const colors = {
+    mint: ['#91dcc9','#58bdaf','#d6fff1','#ff99ab'],
+    pink: ['#ffb1c5','#ec86a6','#ffe5ed','#ff7eaa'],
+    purple: ['#c3b5f4','#9382df','#eae4ff','#ff9fb4'],
+    yellow: ['#ffda8d','#eab65d','#fff1cb','#f58e91']
+  };
+  const $ = id => document.getElementById(id);
+  const clamp = v => Math.max(0,Math.min(100,Number(v)||0));
+  const now = () => Date.now();
+  const capName = text => String(text||'').trim().slice(0,18) || 'โมจิ';
+  const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let pet = null, selectedColor = 'mint', soundOn = false, audio = null, lastPet = 0;
+  let timer = null, gameTimer = null, starScore = 0, starLeft = 12;
+  const requirement = level => 45 + level * 15;
+  const gameDay = p => Math.max(1,Math.floor((now()-p.created)/(5*60*1000))+1);
+  const stage = p => gameDay(p)>=7?'grown':gameDay(p)>=3?'teen':'baby';
+  const stageThai = s => ({baby:'ตัวน้อย',teen:'วัยซน',grown:'โตแล้ว'})[s];
+
+  function initial(name,color){return {
+    version:1, name:capName(name), color, created:now(),lastTick:now(),
+    coins:120,level:1,xp:0,food:82,fun:80,clean:85,energy:90,health:100,
+    sleeping:false,toy:false,ribbon:false,bestScore:0,totalCare:0,
+    log:[{icon:'🥚',text:'ฟักไข่แล้ว! ยินดีต้อนรับ '+capName(name),time:now()}]
+  }}
+  function load(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const p = JSON.parse(raw);
+      if (!p || p.version!==1 || !colors[p.color] || typeof p.created!=='number') return null;
+      for (const k of ['food','fun','clean','energy','health']) p[k]=clamp(p[k]);
+      for (const k of ['coins','level','xp','totalCare','bestScore']) p[k]=Math.max(0,Number(p[k])||0);
+      p.level=Math.max(1,Math.floor(p.level));p.coins=Math.floor(p.coins);p.name=capName(p.name);
+      p.created=Math.min(now(),p.created);p.lastTick=Math.min(now(),Number(p.lastTick)||now());
+      p.log=Array.isArray(p.log)?p.log.filter(x=>x&&typeof x.text==='string').slice(0,12):[];
+      p.sleeping=!!p.sleeping;p.toy=!!p.toy;p.ribbon=!!p.ribbon;
+      return p;
+    } catch(e){ return null; }
+  }
+  function save(){
+    if(!pet)return;
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(pet));$('saveIndicator').textContent='● เซฟอัตโนมัติ';$('saveIndicator').style.color='#709c7a'}
+    catch(e){$('saveIndicator').textContent='⚠ เซฟไม่ได้';$('saveIndicator').style.color='#b56b56'}
+  }
+  function log(icon,text){
+    pet.log.unshift({icon,text,time:now()});pet.log=pet.log.slice(0,12);
+  }
+  function sound(f=600){
+    if(!soundOn)return;
+    try{
+      audio ||= new (window.AudioContext||window.webkitAudioContext)();
+      if(audio.state==='suspended') audio.resume();
+      const osc=audio.createOscillator(),gain=audio.createGain();
+      osc.type='sine';osc.frequency.setValueAtTime(f,audio.currentTime);osc.frequency.exponentialRampToValueAtTime(f*1.23,audio.currentTime+.13);
+      gain.gain.setValueAtTime(.08,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.16);
+      osc.connect(gain);gain.connect(audio.destination);osc.start();osc.stop(audio.currentTime+.17);
+    }catch(e){}
+  }
+  function toast(message){
+    const el=document.createElement('div');el.className='toast';el.textContent=message;$('toasts').appendChild(el);
+    setTimeout(()=>el.remove(),2700);
+    if($('toasts').children.length>3)$('toasts').firstElementChild.remove();
+  }
+  function floaty(text){
+    const scene=$('scene');const e=document.createElement('span');e.className='particle';e.textContent=text;
+    e.style.setProperty('--dx',(Math.floor(Math.random()*120)-60)+'px');scene.appendChild(e);setTimeout(()=>e.remove(),1000);
+  }
+  function speak(t){$('speech').textContent=t}
+  function bounce(symbol){
+    $('petWrap').classList.remove('hop');void $('petWrap').offsetWidth;$('petWrap').classList.add('hop');
+    floaty(symbol);setTimeout(()=>$('petWrap').classList.remove('hop'),700);
+  }
+  function gainXp(xp){
+    pet.xp+=xp;
+    while(pet.xp>=requirement(pet.level)){
+      pet.xp-=requirement(pet.level);pet.level++;pet.coins+=20;
+      pet.health=clamp(pet.health+10);log('🎉','เลเวลอัปเป็น '+pet.level+'! ได้โบนัส 20 เหรียญ');toast('🎉 เลเวล '+pet.level+'! ได้โบนัส 🪙 20');
+    }
+  }
+  function updateTime(){
+    if(!pet)return;
+    // จำกัดการเสื่อมสภาพระหว่างไม่ได้เปิดเกมไว้ไม่เกิน 60 นาทีจริง
+    const minutes=Math.min(60,Math.max(0,(now()-pet.lastTick)/60000));
+    if(minutes<.01)return;
+    pet.lastTick=now();
+    pet.food=clamp(pet.food-1.18*minutes);
+    pet.clean=clamp(pet.clean-.85*minutes);
+    if(pet.sleeping){pet.energy=clamp(pet.energy+5.8*minutes);pet.fun=clamp(pet.fun-.15*minutes)}
+    else{pet.energy=clamp(pet.energy-.98*minutes);pet.fun=clamp(pet.fun-.72*minutes)}
+    if(pet.food<18 || pet.clean<15 || pet.energy<8){pet.health=clamp(pet.health-.72*minutes)}
+    else if(pet.food>40 && pet.clean>40 && pet.energy>45){pet.health=clamp(pet.health+.18*minutes)}
+    if(pet.health<=10 && pet.sleeping){pet.health=clamp(pet.health+.5*minutes)}
+  }
+  function render(){
+    if(!pet)return;
+    const s=stage(pet),day=gameDay(pet),good=pet.health>=30 && pet.food>23 && pet.fun>23 && pet.clean>20;
+    const [main,dark,light,cheek]=colors[pet.color];
+    const root=$('petWrap');root.style.setProperty('--pet',main);root.style.setProperty('--pet-dark',dark);root.style.setProperty('--pet-light',light);root.style.setProperty('--cheek',cheek);
+    root.classList.remove('stage-baby','stage-teen','stage-grown','sad','sleepy');
+    root.classList.add('stage-'+s);if(pet.sleeping)root.classList.add('sleepy');else if(!good)root.classList.add('sad');
+    $('scene').classList.toggle('night',pet.sleeping);
+    $('petName').textContent=pet.name+(pet.ribbon?' 🎀':' 🌼');
+    $('ageBadge').textContent='🐣 วันที่ '+day+' · '+stageThai(s);
+    $('dayStat').textContent=day+' วัน';$('levelStat').textContent=pet.level;$('stageStat').textContent=stageThai(s);
+    $('coinsTop').textContent=pet.coins.toLocaleString('th-TH');
+    ['food','fun','clean','energy','health'].forEach(k=>{
+      const v=Math.round(pet[k]);$(k+'Num').textContent=v+'%';$(k+'Bar').style.width=v+'%';$(k+'Bar').classList.toggle('low',v<23);
+    });
+    $('mouth').setAttribute('d',!good?'M118 175 Q126 166 134 175':'M118 167 Q126 177 134 167');
+    let mood = '💚 กำลังมีความสุขสุด ๆ';
+    if(pet.sleeping)mood='💤 กำลังฝันหวานอยู่...';
+    else if(pet.health<30)mood='❤️‍🩹 ไม่ค่อยสบาย ดูแลหน่อยนะ';
+    else if(pet.food<25)mood='🍙 ท้องร้องจ๊อก ๆ แล้ว';
+    else if(pet.clean<25)mood='🫧 อยากอาบน้ำแล้ว!';
+    else if(pet.energy<22)mood='🥱 ง่วงแล้ว ขอพักหน่อย';
+    else if(pet.fun<25)mood='🥺 เหงาจัง มาเล่นกันเถอะ';
+    $('moodText').textContent=mood;
+    $('sleepLabel').textContent=pet.sleeping?'ตื่นนอน':'เข้านอน';$('sleepSub').textContent=pet.sleeping?'ปลุกเจ้าตัวน้อย':'ฟื้นฟูพลังงาน';
+    for(const b of document.querySelectorAll('[data-action]')){
+      b.disabled=pet.sleeping&&!['sleep'].includes(b.dataset.action);
+    }
+    $('xpTitle').textContent='✨ EXP เลเวล '+pet.level;
+    $('xpCount').textContent=Math.floor(pet.xp)+' / '+requirement(pet.level);
+    $('xpBar').style.width=Math.min(100,pet.xp/requirement(pet.level)*100)+'%';
+    document.querySelectorAll('[data-buy]').forEach(b=>{
+      b.disabled=(b.dataset.buy==='teddy'&&pet.toy)||(b.dataset.buy==='ribbon'&&pet.ribbon)||pet.sleeping;
+      if(b.dataset.buy==='teddy'&&pet.toy)b.textContent='ซื้อแล้ว ✓';
+      if(b.dataset.buy==='ribbon'&&pet.ribbon)b.textContent='ซื้อแล้ว ✓';
+    });
+    let items=[];if(pet.toy)items.push('🧸 ตุ๊กตาหมี');if(pet.ribbon)items.push('🎀 โบ');
+    $('inventoryText').textContent='🎒 ของสะสม: '+(items.length?items.join(' · '):'ยังไม่มี');
+    $('totalCare').textContent='ดูแล '+pet.totalCare+' ครั้ง';
+    $('logList').replaceChildren();
+    for(const entry of pet.log){
+      const li=document.createElement('li');li.innerHTML='<span>'+esc(entry.icon)+'</span><span><strong>'+esc(entry.text)+'</strong><br><small>'+new Date(entry.time).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</small></span>';
+      $('logList').appendChild(li);
+    }
+    $('growTip').textContent=day<3?'🌱 อีก '+(3-day)+' วันในเกมจะเข้าสู่วัยซน':day<7?'🌷 อีก '+(7-day)+' วันในเกมจะเติบโตเต็มวัย':'🌳 โตเต็มวัยแล้ว! เก็บเลเวลกันต่อเลย';
+    $('bestScore').textContent=pet.bestScore;
+  }
+  function act(action){
+    if(!pet)return;
+    updateTime();
+    if(pet.sleeping&&action!=='sleep'){toast('💤 น้องกำลังหลับ ปลุกก่อนนะ');return}
+    if(action==='game'){openGame();return}
+    if(action==='sleep'){
+      pet.sleeping=!pet.sleeping;
+      speak(pet.sleeping?'ฝันดีนะ Zzz... 💤':'ตื่นแล้ว! ไปเล่นกัน 🐣');
+      if(!pet.sleeping)bounce('☀️');
+      log('🌙',pet.sleeping?'เข้านอนพักผ่อน':'ตื่นนอนสดใส');sound(430);save();render();return;
+    }
+    const actions={
+      feed:()=>{
+        if(pet.coins<8){toast('🪙 เหรียญไม่พอ ลองเล่นเกมจับดาว');return false}
+        if(pet.food>=99){toast('🍙 อิ่มมากแล้ว ไว้กินทีหลังนะ');return false}
+        pet.coins-=8;pet.food=clamp(pet.food+25);pet.fun=clamp(pet.fun+3);gainXp(12);speak('อร่อยจังเลย! งั่ม ๆ 🍙');bounce('🍙');log('🍙','กินข้าวอย่างเอร็ดอร่อย');return true;
+      },
+      play:()=>{
+        if(pet.energy<12){toast('🥱 พลังงานไม่พอ ให้น้องนอนก่อน');return false}
+        pet.fun=clamp(pet.fun+(pet.toy?35:24));pet.energy=clamp(pet.energy-11);pet.food=clamp(pet.food-5);pet.coins+=5;gainXp(14);speak('เย้! เล่นอีก ๆ 💕');bounce('💗');log('🪀','เล่นสนุก ได้ 5 เหรียญ');return true;
+      },
+      wash:()=>{
+        if(pet.clean>=99){toast('🫧 สะอาดวิ้ง ๆ อยู่แล้ว');return false}
+        pet.clean=clamp(pet.clean+32);pet.fun=clamp(pet.fun+3);gainXp(10);speak('หอมฟุ้งเลยย 🫧');bounce('🫧');log('🧼','อาบน้ำสะอาดเอี่ยม');return true;
+      },
+      heal:()=>{
+        if(pet.health>=99){toast('❤️ สุขภาพดีอยู่แล้วจ้า');return false}
+        if(pet.coins<20){toast('🪙 ต้องมี 20 เหรียญเพื่อซื้อยา');return false}
+        pet.coins-=20;pet.health=clamp(pet.health+30);gainXp(8);speak('ขอบคุณที่ดูแลนะ ❤️');bounce('❤️');log('💊','กินยาและพักฟื้น');return true;
+      }
+    };
+    if(actions[action]?.()){pet.totalCare++;sound(action==='play'?770:580);save();render()}
+  }
+  function buy(item){
+    if(!pet||pet.sleeping){toast('💤 ปลุกน้องก่อนนะ');return}
+    const prices={berry:15,teddy:55,ribbon:80};const cost=prices[item];
+    if(!cost)return;
+    if(item==='teddy'&&pet.toy || item==='ribbon'&&pet.ribbon){toast('🎁 มีของนี้แล้วนะ');return}
+    if(pet.coins<cost){toast('🪙 เหรียญไม่พอ ลองเล่นเกมจับดาว');return}
+    pet.coins-=cost;
+    if(item==='berry'){pet.food=clamp(pet.food+12);pet.fun=clamp(pet.fun+15);speak('หวานอร่อยที่สุด! 🍓');bounce('🍓');log('🍓','กินสตรอว์เบอร์รี')}
+    if(item==='teddy'){pet.toy=true;pet.fun=clamp(pet.fun+35);speak('มีเพื่อนเพิ่มอีกตัว! 🧸');bounce('🧸');log('🧸','ได้ตุ๊กตาหมีตัวใหม่')}
+    if(item==='ribbon'){pet.ribbon=true;speak('สวยไหมล่ะ! 🎀');bounce('🎀');log('🎀','ได้โบสีชมพู')}
+    gainXp(8);pet.totalCare++;sound(840);save();render();toast('🛍️ ซื้อสำเร็จ!');
+  }
+  function petting(){
+    if(!pet||pet.sleeping)return;
+    if(now()-lastPet<5000){speak('ฮิฮิ จั๊กจี้~ 💕');return}
+    lastPet=now();pet.fun=clamp(pet.fun+3);speak('ชอบโดนลูบหัวจัง 🥰');bounce('💕');sound(720);save();render();
+  }
+  function showModal(id){$(id).hidden=false;document.body.style.overflow='hidden'}
+  function hideModal(id){$(id).hidden=true;document.body.style.overflow='';}
+  function switchTab(id){
+    document.querySelectorAll('.tab').forEach(btn=>{const active=btn.dataset.tab===id;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active)});
+    document.querySelectorAll('.tab-content').forEach(el=>el.classList.toggle('active',el.id===id));
+  }
+  function openGame(){
+    if(pet.sleeping){toast('ปลุกน้องก่อนนะ');return}
+    starLeft=12;starScore=0;resetStarField();$('starScore').textContent=0;$('starTime').textContent=12;
+    $('gameClose').disabled=false;showModal('gameModal');
+  }
+  function resetStarField(){
+    $('starField').innerHTML='<div class="game-result"><span class="big">✨</span><strong>พร้อมจับดาวหรือยัง?</strong><p>ดาวหนึ่งดวงมีค่า 2 เหรียญ</p><button class="primary" id="starStart" style="max-width:210px">เริ่มเล่น!</button></div>';
+    $('starStart').addEventListener('click',startStars);
+  }
+  function createStar(){
+    const field=$('starField');field.replaceChildren();
+    const star=document.createElement('button');star.className='star';star.textContent=['⭐','🌟','✨'][Math.floor(Math.random()*3)];star.setAttribute('aria-label','เก็บดาว');
+    star.style.left=(5+Math.random()*75)+'%';star.style.top=(5+Math.random()*72)+'%';
+    star.addEventListener('click',()=>{starScore++;$('starScore').textContent=starScore;sound(650+Math.min(starScore*19,700));createStar()});field.appendChild(star);
+  }
+  function startStars(){
+    if(gameTimer)return;
+    starLeft=12;starScore=0;$('starScore').textContent=0;$('starTime').textContent=12;
+    createStar();
+    const start=performance.now();
+    gameTimer=setInterval(()=>{
+      starLeft=Math.max(0,12-Math.floor((performance.now()-start)/1000));$('starTime').textContent=starLeft;
+      if(starLeft<=0)finishStars(true);
+    },150);
+  }
+  function finishStars(reward){
+    clearInterval(gameTimer);gameTimer=null;
+    if(!reward){resetStarField();return}
+    const amount=Math.min(100,starScore*2);
+    pet.coins+=amount;pet.fun=clamp(pet.fun+Math.min(15,starScore));gainXp(Math.min(25,starScore));
+    pet.bestScore=Math.max(pet.bestScore,starScore);pet.totalCare++;
+    log('⭐','จับดาว '+starScore+' ดวง ได้ '+amount+' เหรียญ');
+    save();render();
+    $('starField').innerHTML='<div class="game-result"><span class="big">🏆</span><strong>เก่งมาก! จับได้ '+starScore+' ดวง</strong><p>รับ 🪙 '+amount+' เหรียญ + EXP แล้ว!</p><button class="primary" id="starAgain" style="max-width:210px">เล่นอีกครั้ง</button></div>';
+    $('starAgain').addEventListener('click',startStars);toast('⭐ ได้ '+amount+' เหรียญ!');
+  }
+  function init(){
+    document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+    document.querySelectorAll('[data-action]').forEach(b=>b.addEventListener('click',()=>act(b.dataset.action)));
+    document.querySelectorAll('[data-buy]').forEach(b=>b.addEventListener('click',()=>buy(b.dataset.buy)));
+    document.querySelectorAll('.color-option').forEach(b=>b.addEventListener('click',()=>{
+      selectedColor=b.dataset.color;document.querySelectorAll('.color-option').forEach(x=>x.classList.toggle('selected',x===b));
+    }));
+    $('petWrap').addEventListener('click',petting);
+    $('petWrap').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();petting()}});
+    $('startBtn').addEventListener('click',()=>{
+      pet=initial($('newName').value,selectedColor);save();render();speak('เราเป็นเพื่อนกันแล้วนะ! 💚');hideModal('startModal');toast('🐣 ฟักไข่สำเร็จ! ยินดีต้อนรับ '+pet.name);
+    });
+    $('newName').addEventListener('keydown',e=>{if(e.key==='Enter')$('startBtn').click()});
+    $('settingsBtn').addEventListener('click',()=>{if(!pet)return;$('renameInput').value=pet.name;$('soundToggle').textContent=soundOn?'เปิดเสียง':'ปิดเสียง';showModal('settingsModal')});
+    document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>hideModal(b.dataset.close)));
+    $('renameBtn').addEventListener('click',()=>{
+      pet.name=capName($('renameInput').value);log('✏️','เปลี่ยนชื่อเป็น '+pet.name);save();render();toast('✏️ เปลี่ยนชื่อเรียบร้อย');hideModal('settingsModal');
+    });
+    function toggleSound(){soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';$('soundToggle').textContent=soundOn?'เปิดเสียง':'ปิดเสียง';sound(700)}
+    $('soundBtn').addEventListener('click',toggleSound);$('soundToggle').addEventListener('click',toggleSound);
+    const restart=()=>{
+      if(!confirm('ต้องการลบเซฟสัตว์เลี้ยงทั้งหมด แล้วเริ่มใหม่จริง ๆ หรือไม่?'))return;
+      finishStars(false);pet=null;try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+      hideModal('settingsModal');selectedColor='mint';document.querySelectorAll('.color-option').forEach(x=>x.classList.toggle('selected',x.dataset.color==='mint'));
+      $('newName').value='โมจิ';showModal('startModal');toast('🌱 พร้อมเริ่มต้นใหม่แล้ว');
+    };
+    $('restartBtn').addEventListener('click',restart);$('resetLink').addEventListener('click',restart);
+    $('gameClose').addEventListener('click',()=>{if(gameTimer)finishStars(true);hideModal('gameModal')});
+    $('starStart').addEventListener('click',startStars);
+    pet=load();
+    if(pet){updateTime();render();speak(pet.sleeping?'Zzz... ฝันดี 💤':'กลับมาแล้วเหรอ คิดถึงจัง! 💕');save()}
+    else showModal('startModal');
+    timer=setInterval(()=>{if(pet){const prev=stage(pet);updateTime();const current=stage(pet);if(prev!==current){log('🎉','เติบโตเป็น'+stageThai(current)+'แล้ว!');toast('🎉 '+pet.name+' เติบโตเป็น'+stageThai(current)+'แล้ว!');speak('ตัวโตขึ้นแล้วนะ! 🌷')};render();save()}},10000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&pet){updateTime();render();save()}});
+    window.addEventListener('pagehide',()=>{if(pet)save()});
+  }
+  init();
+})();
+</script>
+</body>
+</html>
