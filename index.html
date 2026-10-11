@@ -151,6 +151,28 @@
     @media(max-width:500px){.shell{padding:17px 12px 32px}.topbar{margin-bottom:17px}.brand h1{font-size:21px}.brandmark{width:42px;height:42px;font-size:22px}.pill{padding:9px 11px;font-size:11px;gap:5px}.pill strong{font-size:13px}.header-button{width:38px;height:38px}.brand .sub{letter-spacing:1.2px;font-size:8px;white-space:nowrap}.topbar{gap:9px}.header-right{gap:6px;flex-wrap:nowrap}.brand{gap:8px;min-width:0}.brand h1{font-size:18px;white-space:nowrap}.brandmark{width:37px;height:37px;font-size:20px;flex-shrink:0}.pill{padding:8px 9px}.header-button{width:34px;height:34px}.layout{gap:13px}.scene-card{padding:11px}.scene-top{padding:6px 5px 12px}.scene{height:330px}.pet-stage{bottom:43px}.pet-wrap.stage-grown{width:213px}.pet-wrap.stage-teen{width:199px}.pet-wrap.stage-baby{width:180px}.pet-name{font-size:24px}.speech{font-size:11px;top:14px}.sun{width:47px;height:47px;right:28px;top:65px}.cloud{left:27px;top:102px;scale:.75}.panel{padding:18px}.panel h2{font-size:17px}.action{gap:8px;padding:11px;min-height:79px}.action .bubble{width:36px;height:37px;font-size:21px}.action strong{font-size:12px}.action small{font-size:9px}.mini-stat{padding:11px}.mini-stat strong{font-size:18px}.pet-quip{align-items:start}.pet-quip .hint{max-width:48%}.flower{font-size:21px}.modal{padding:22px}.stat-grid{column-gap:15px}}
     @media(max-width:360px){.brandmark{display:none}.pill{padding:7px 8px}.header-button{width:32px;height:32px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+
+    /* Cloudflare AI pet chat */
+    .tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .ai-intro{font-size:12px;color:#758776;margin:0 0 12px}
+    .ai-feed{height:240px;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px;padding:13px;background:#f7faf6;border:1px solid #e2ece0;border-radius:16px}
+    .ai-msg{display:flex;align-items:flex-end;gap:7px;max-width:94%}
+    .ai-msg.user{align-self:flex-end;flex-direction:row-reverse}
+    .ai-avatar{font-size:20px}
+    .ai-bubble{padding:9px 12px;background:white;border:1px solid #e5eee3;border-radius:13px 13px 13px 4px;font-size:12px;color:#496354;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+    .ai-msg.user .ai-bubble{background:#e3f5e9;border-color:#d1ebd8;border-radius:13px 13px 4px 13px}
+    .ai-form{display:flex;gap:8px;margin-top:11px}
+    .ai-form input{min-width:0;flex:1}
+    .ai-form button{background:#397a56;border:0;border-radius:12px;color:white;padding:0 14px;font-weight:900;white-space:nowrap}
+    .ai-form button:disabled{opacity:.5;cursor:wait}
+    .ai-quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+    .ai-quick button{border:1px solid #daeada;border-radius:99px;background:#f1f8ef;padding:6px 10px;font-size:11px;color:#4c755b;font-weight:850}
+    .ai-status{font-size:11px;color:#778e7e;font-weight:800;margin:11px 0 0}
+    .ai-settings{padding:13px;border:1px solid #deecdd;background:#f6fbf5;border-radius:13px;margin:0 0 16px}
+    .ai-settings label{font-size:12px;font-weight:900;display:block;margin-bottom:8px}
+    .ai-settings p{font-size:11px;margin:8px 0}
+    .ai-settings .secondary{margin-top:10px}
+    @media(max-width:500px){.tab{font-size:10px;padding:9px 2px}.ai-feed{height:220px}}
   </style>
 </head>
 <body>
@@ -218,6 +240,7 @@
           <button role="tab" aria-selected="true" class="tab active" data-tab="care">🌿 ดูแล</button>
           <button role="tab" aria-selected="false" class="tab" data-tab="shop">🛍️ ร้านค้า</button>
           <button role="tab" aria-selected="false" class="tab" data-tab="diary">📖 บันทึก</button>
+          <button role="tab" aria-selected="false" class="tab" data-tab="chat">💬 คุย AI</button>
         </div>
         <div class="tab-content active" id="care" role="tabpanel">
           <div class="action-grid">
@@ -242,17 +265,40 @@
           <ul class="log-list" id="logList"><li>🌼 ยินดีต้อนรับสู่สวนโมจิ!</li></ul>
           <div class="activity-tip" id="growTip">🌱 ดูแลเจ้าตัวน้อย แล้วเติบโตไปด้วยกัน</div>
         </div>
+
+        <div class="tab-content" id="chat" role="tabpanel" aria-label="คุยกับสัตว์เลี้ยง">
+          <p class="ai-intro">🐣 คุยกับน้องได้เลย! เมื่อเชื่อม Cloudflare Workers AI น้องจะตอบตามความหิว ความสุข และอารมณ์จริงในเกม</p>
+          <div class="ai-feed" id="aiChatFeed" role="log" aria-live="polite" aria-label="ข้อความแชต"><div class="ai-msg"><span class="ai-avatar">🐣</span><div class="ai-bubble">สวัสดี! มาคุยกันนะ 💚</div></div></div>
+          <form class="ai-form" id="aiChatForm">
+            <input class="text-input" id="aiChatInput" maxlength="180" autocomplete="off" aria-label="ข้อความถึงสัตว์เลี้ยง" placeholder="พิมพ์คุยกับน้อง...">
+            <button id="aiSendBtn" type="submit">ส่ง 💌</button>
+          </form>
+          <div class="ai-quick" aria-label="ข้อความแนะนำ">
+            <button type="button" data-chat-quick="วันนี้เป็นยังไงบ้าง?">💗 อารมณ์วันนี้</button>
+            <button type="button" data-chat-quick="หิวไหมเอ่ย?">🍙 หิวไหม</button>
+            <button type="button" data-chat-quick="อยากเล่นอะไรดี?">⭐ เล่นอะไรดี</button>
+          </div>
+          <p class="ai-status" id="aiChatStatus">🟡 โหมดแชตจำลอง · เชื่อม Worker ได้ที่ ⚙️</p>
+        </div>
         <div class="xpbar"><div class="xpbar-top"><span id="xpTitle">✨ EXP เลเวล 1</span><span class="muted" id="xpCount">0 / 60</span></div><div class="meter"><div class="fill" id="xpBar"></div></div></div>
       </section>
     </div>
   </div>
-  <footer class="footer"><span>🌷 Mochi Garden — เกมตัวอย่าง HTML ไฟล์เดียว · เล่นได้แม้ไม่มีอินเทอร์เน็ต</span><span>💾 ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · <button id="resetLink">เริ่มเกมใหม่</button></span></footer>
+  <footer class="footer"><span>🌷 Mochi Garden — เกม HTML/JS · เล่นออฟไลน์ได้ (ยกเว้น AI)</span><span>💾 ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ · <button id="resetLink">เริ่มเกมใหม่</button></span></footer>
 </main>
 <div class="modal-backdrop" id="startModal" hidden role="dialog" aria-modal="true" aria-labelledby="startTitle">
   <div class="modal"><div class="intro-pet">🥚</div><h2 id="startTitle" style="text-align:center">รับน้องมาเลี้ยงกัน! 🌷</h2><p style="text-align:center">ตั้งชื่อน่ารัก ๆ แล้วเลือกสีให้เพื่อนตัวจิ๋วของคุณ</p><label class="label" for="newName">ชื่อสัตว์เลี้ยง</label><input class="text-input" id="newName" maxlength="18" value="โมจิ" placeholder="เช่น โมจิ, พุดดิ้ง, บับเบิล"><label class="label" style="margin-top:17px">เลือกสีน้อง</label><div class="color-options" id="colorOptions"><button class="color-option selected" data-color="mint"><span class="egg">🟢</span>มินต์</button><button class="color-option" data-color="pink"><span class="egg">🩷</span>ชมพู</button><button class="color-option" data-color="purple"><span class="egg">💜</span>ม่วง</button><button class="color-option" data-color="yellow"><span class="egg">💛</span>ครีม</button></div><button class="primary" id="startBtn">🐣 ฟักไข่เลย!</button><p class="tiny" style="text-align:center;margin:15px 0 0">เกมจำลอง: ไม่มีบัญชีล็อกอิน บันทึกด้วย LocalStorage เท่านั้น</p></div>
 </div>
 <div class="modal-backdrop" id="settingsModal" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-  <div class="modal"><button class="close-btn" data-close="settingsModal" aria-label="ปิด">×</button><h2 id="settingsTitle">⚙️ ตั้งค่าเกม</h2><p>ปรับชื่อและจัดการข้อมูลสัตว์เลี้ยงของคุณ</p><label class="label" for="renameInput">เปลี่ยนชื่อสัตว์เลี้ยง</label><div style="display:flex;gap:9px;margin-bottom:17px"><input class="text-input" id="renameInput" maxlength="18"><button class="secondary" id="renameBtn">บันทึก</button></div><div class="settings-list"><div class="settings-row"><span>🔊 เสียงเอฟเฟกต์</span><button class="secondary" id="soundToggle">ปิดเสียง</button></div><div class="settings-row"><span>💾 ที่เก็บข้อมูล</span><span class="muted">LocalStorage</span></div><div class="settings-row"><span>🌱 เวลาเติบโต</span><span class="muted">วันละ 5 นาที</span></div></div><button class="danger" id="restartBtn">🗑️ ลบเซฟและเริ่มเลี้ยงใหม่</button><p class="tiny" style="margin-top:15px">⚠️ ไฟล์ HTML นี้ไม่มีระบบเซิร์ฟเวอร์ ผู้เล่นสามารถแก้เซฟของตัวเองได้ เหมาะสำหรับทดลองเกมเท่านั้น</p></div>
+  <div class="modal"><button class="close-btn" data-close="settingsModal" aria-label="ปิด">×</button><h2 id="settingsTitle">⚙️ ตั้งค่าเกม</h2><p>ปรับชื่อและจัดการข้อมูลสัตว์เลี้ยงของคุณ</p><label class="label" for="renameInput">เปลี่ยนชื่อสัตว์เลี้ยง</label><div style="display:flex;gap:9px;margin-bottom:17px"><input class="text-input" id="renameInput" maxlength="18"><button class="secondary" id="renameBtn">บันทึก</button></div><div class="settings-list"><div class="settings-row"><span>🔊 เสียงเอฟเฟกต์</span><button class="secondary" id="soundToggle">ปิดเสียง</button></div><div class="settings-row"><span>💾 ที่เก็บข้อมูล</span><span class="muted">LocalStorage</span></div><div class="settings-row"><span>🌱 เวลาเติบโต</span><span class="muted">วันละ 5 นาที</span></div></div>
+        <div class="ai-settings">
+          <label for="aiWorkerUrl">🤖 เชื่อม Cloudflare Workers AI</label>
+          <p>วาง URL ของ Worker เช่น https://mochi-garden-ai.SUBDOMAIN.workers.dev (ไม่ต้องใส่ /chat)</p>
+          <input class="text-input" id="aiWorkerUrl" type="url" placeholder="https://...workers.dev" autocomplete="off" spellcheck="false">
+          <button class="secondary" id="aiWorkerSave" type="button">🔗 บันทึกการเชื่อมต่อ AI</button>
+          <p id="aiWorkerHint" aria-live="polite">ยังไม่ได้ตั้งค่า Worker</p>
+        </div>
+<button class="danger" id="restartBtn">🗑️ ลบเซฟและเริ่มเลี้ยงใหม่</button><p class="tiny" style="margin-top:15px">⚠️ ไฟล์ HTML นี้ไม่มีระบบเซิร์ฟเวอร์ ผู้เล่นสามารถแก้เซฟของตัวเองได้ เหมาะสำหรับทดลองเกมเท่านั้น</p></div>
 </div>
 <div class="modal-backdrop" id="gameModal" hidden role="dialog" aria-modal="true" aria-labelledby="gameTitle">
   <div class="modal"><button class="close-btn" id="gameClose" aria-label="ปิด">×</button><h2 id="gameTitle">⭐ เกมเก็บดาว</h2><p>แตะดาวให้ได้มากที่สุดภายใน 12 วินาที เพื่อสะสมเหรียญ!</p><div class="minigame-header"><span>⭐ คะแนน <span id="starScore">0</span></span><span>⏱️ <span id="starTime">12</span> วิ</span></div><div class="minigame-field" id="starField"><div class="game-result"><span class="big">✨</span><strong>พร้อมจับดาวหรือยัง?</strong><p>ดาวหนึ่งดวงมีค่า 2 เหรียญ</p><button class="primary" id="starStart" style="max-width:210px">เริ่มเล่น!</button></div></div><p class="tiny" style="text-align:center;margin:13px 0 0">เล่นได้อีกหลังจบรอบ · คะแนนสูงสุด <span id="bestScore">0</span></p></div>
@@ -516,7 +562,8 @@
     $('soundBtn').addEventListener('click',toggleSound);$('soundToggle').addEventListener('click',toggleSound);
     const restart=()=>{
       if(!confirm('ต้องการลบเซฟสัตว์เลี้ยงทั้งหมด แล้วเริ่มใหม่จริง ๆ หรือไม่?'))return;
-      finishStars(false);pet=null;try{localStorage.removeItem(STORAGE_KEY)}catch(e){}
+      finishStars(false);pet=null;try{localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('mochi_garden_ai_chat_v1')}catch(e){}
+       document.dispatchEvent(new Event('mochi-reset'));
       hideModal('settingsModal');selectedColor='mint';document.querySelectorAll('.color-option').forEach(x=>x.classList.toggle('selected',x.dataset.color==='mint'));
       $('newName').value='โมจิ';showModal('startModal');toast('🌱 พร้อมเริ่มต้นใหม่แล้ว');
     };
@@ -533,5 +580,6 @@
   init();
 })();
 </script>
+<script src="ai-chat.js"></script>
 </body>
 </html>
